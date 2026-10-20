@@ -1,0 +1,181 @@
+# Instrument definitions. Add or remove pairs here; `--all` scans every entry.
+#
+# pip_size        price change of one pip (0.0001, 0.01 for JPY, 0.1 for gold)
+# price_decimals  quote precision
+# contract_size   units per standard lot (100 oz for gold)
+# spread_pips / slippage_pips   cost assumptions for the backtest and R:R
+# sessions        liquid windows in which new entries are allowed
+# round_steps     psychological levels [major, minor]
+# pip_value_usd   fallback USD pip value per lot when no conversion rate is cached
+# symbols per source: dukascopy / yfinance / oanda / twelvedata
+# dukascopy_point  price divisor for raw Dukascopy bi5 files
+
+EURUSD:
+  base: EUR
+  quote: USD
+  pip_size: 0.0001
+  price_decimals: 5
+  contract_size: 100000
+  spread_pips: 0.8
+  slippage_pips: 0.2
+  sessions: [london, overlap]
+  round_steps: [0.01, 0.005]
+  pip_value_usd: 10.0
+  dukascopy: EUR/USD
+  dukascopy_point: 100000
+  yfinance: EURUSD=X
+  oanda: EUR_USD
+  twelvedata: EUR/USD
+
+GBPUSD:
+  base: GBP
+  quote: USD
+  pip_size: 0.0001
+  price_decimals: 5
+  contract_size: 100000
+  spread_pips: 1.2
+  slippage_pips: 0.3
+  sessions: [london, overlap]
+  round_steps: [0.01, 0.005]
+  pip_value_usd: 10.0
+  dukascopy: GBP/USD
+  dukascopy_point: 100000
+  yfinance: GBPUSD=X
+  oanda: GBP_USD
+  twelvedata: GBP/USD
+
+USDJPY:
+  base: USD
+  quote: JPY
+  pip_size: 0.01
+  price_decimals: 3
+  contract_size: 100000
+  spread_pips: 1.0
+  slippage_pips: 0.3
+  sessions: [asia, london]
+  round_steps: [1.0, 0.5]
+  pip_value_usd: 6.7
+  dukascopy: USD/JPY
+  dukascopy_point: 1000
+  yfinance: JPY=X
+  oanda: USD_JPY
+  twelvedata: USD/JPY
+
+USDCHF:
+  base: USD
+  quote: CHF
+  pip_size: 0.0001
+  price_decimals: 5
+  contract_size: 100000
+  spread_pips: 1.4
+  slippage_pips: 0.3
+  sessions: [london, overlap]
+  round_steps: [0.01, 0.005]
+  pip_value_usd: 12.5
+  dukascopy: USD/CHF
+  dukascopy_point: 100000
+  yfinance: CHF=X
+  oanda: USD_CHF
+  twelvedata: USD/CHF
+
+AUDUSD:
+  base: AUD
+  quote: USD
+  pip_size: 0.0001
+  price_decimals: 5
+  contract_size: 100000
+  spread_pips: 1.0
+  slippage_pips: 0.3
+  sessions: [asia, london]
+  round_steps: [0.01, 0.005]
+  pip_value_usd: 10.0
+  dukascopy: AUD/USD
+  dukascopy_point: 100000
+  yfinance: AUDUSD=X
+  oanda: AUD_USD
+  twelvedata: AUD/USD
+
+USDCAD:
+  base: USD
+  quote: CAD
+  pip_size: 0.0001
+  price_decimals: 5
+  contract_size: 100000
+  spread_pips: 1.5
+  slippage_pips: 0.3
+  sessions: [london, newyork]
+  round_steps: [0.01, 0.005]
+  pip_value_usd: 7.2
+  dukascopy: USD/CAD
+  dukascopy_point: 100000
+  yfinance: CAD=X
+  oanda: USD_CAD
+  twelvedata: USD/CAD
+
+NZDUSD:
+  base: NZD
+  quote: USD
+  pip_size: 0.0001
+  price_decimals: 5
+  contract_size: 100000
+  spread_pips: 1.5
+  slippage_pips: 0.3
+  sessions: [asia, london]
+  round_steps: [0.01, 0.005]
+  pip_value_usd: 10.0
+  dukascopy: NZD/USD
+  dukascopy_point: 100000
+  yfinance: NZDUSD=X
+  oanda: NZD_USD
+  twelvedata: NZD/USD
+
+EURJPY:
+  base: EUR
+  quote: JPY
+  pip_size: 0.01
+  price_decimals: 3
+  contract_size: 100000
+  spread_pips: 1.5
+  slippage_pips: 0.4
+  sessions: [asia, london]
+  round_steps: [1.0, 0.5]
+  pip_value_usd: 6.7
+  dukascopy: EUR/JPY
+  dukascopy_point: 1000
+  yfinance: EURJPY=X
+  oanda: EUR_JPY
+  twelvedata: EUR/JPY
+
+GBPJPY:
+  base: GBP
+  quote: JPY
+  pip_size: 0.01
+  price_decimals: 3
+  contract_size: 100000
+  spread_pips: 2.5
+  slippage_pips: 0.5
+  sessions: [asia, london]
+  round_steps: [1.0, 0.5]
+  pip_value_usd: 6.7
+  dukascopy: GBP/JPY
+  dukascopy_point: 1000
+  yfinance: GBPJPY=X
+  oanda: GBP_JPY
+  twelvedata: GBP/JPY
+
+XAUUSD:
+  base: XAU
+  quote: USD
+  pip_size: 0.1                 # 1 pip = $0.10 move; 1 lot = 100 oz => $10 per pip
+  price_decimals: 2
+  contract_size: 100
+  spread_pips: 3.0
+  slippage_pips: 1.0
+  sessions: [london, overlap]
+  round_steps: [100.0, 50.0]
+  pip_value_usd: 10.0
+  dukascopy: XAU/USD
+  dukascopy_point: 1000
+  yfinance: GC=F                 # COMEX futures: tracks spot but with a basis (not identical prices)
+  oanda: XAU_USD
+  twelvedata: XAU/USD

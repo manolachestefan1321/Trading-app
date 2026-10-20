@@ -1,0 +1,118 @@
+# forex-price-action-signal configuration.
+# All times are UTC unless stated otherwise.
+
+data:
+  years: 2                       # history to keep per pair (CLI --years overrides)
+  cache_dir: data/cache
+  # Fallback chain, tried in order until one source returns data.
+  sources: [dukascopy, yfinance, oanda, twelvedata]
+  max_retries: 4                 # per network call, exponential backoff
+  backoff_base_seconds: 2.0
+  spike_range_multiple: 10.0     # candle range > N x rolling median range => flagged as spike
+  calendar_url: https://nfs.faireconomy.media/ff_calendar_thisweek.json
+  calendar_refresh_hours: 6      # ForexFactory rate-limits; don't hammer it
+
+analysis:
+  lookback_bars: 1200            # 1H bars used for swings / zones (~50 trading days)
+  htf_lookback_bars: 2400        # 1H bars resampled into 4H / Daily (~100 trading days)
+  atr_period: 14
+
+swings:
+  fractal_window: 3              # candles on each side of a fractal
+  min_swing_atr: 0.75            # minimum swing-to-swing distance in ATR (noise filter)
+
+structure:
+  event_lookback_bars: 36        # a BOS / CHoCH counts as "recent" for this many 1H bars
+  strength_full_count: 6         # consecutive confirming swings for strength = 100
+
+htf:
+  enabled: true
+  daily_fractal_window: 2
+  h4_fractal_window: 2
+  min_swing_atr: 0.5
+  allow_daily_range: false       # spec: only trade with the Daily trend (or a 4H CHoCH)
+  choch_lookback_h4_bars: 12     # a 4H CHoCH within the last N 4H bars overrides the Daily filter
+
+zones:
+  cluster_atr: 0.6               # swings within N ATR merge into one zone
+  min_width_atr: 0.25
+  max_width_atr: 1.2
+  max_zones: 12
+  recency_halflife_bars: 240
+  near_atr: 0.35                 # price within N ATR of a zone counts as "at the zone"
+  key_level_bonus: 15            # score points added when a key level sits inside a zone
+  room_min_atr: 1.0              # less room than this to the next opposing zone halves location score
+
+key_levels:
+  enabled: true
+  round_numbers_each_side: 2
+
+candles:
+  min_range_atr: 0.5             # candles smaller than this are ignored
+  pin_wick_body_ratio: 2.0
+  pin_wick_range_ratio: 0.6
+  pin_opposite_wick_ratio: 0.25
+  doji_body_ratio: 0.1
+  engulf_min_body_atr: 0.4
+  star_big_body_ratio: 0.55
+  tweezer_tolerance_atr: 0.1
+  swing_proximity_bars: 3        # a pattern at the extreme of the last N*2 bars counts as "at a swing point"
+
+behavior:
+  breakout_close_atr: 0.3        # decisive close beyond a zone
+  decisive_body_atr: 0.5
+  retest_bars: 24                # look this far back for a breakout that is now being retested
+  london_sweep_hours: [7, 10]    # window in which London sweeps of the Asian range are flagged
+
+volume:
+  rolling: 20
+  label: "tick volume (weak confirmation)"
+
+sessions:                        # [start_hour, end_hour) UTC
+  asia: [0, 7]
+  london: [7, 16]
+  newyork: [12, 21]
+  overlap: [12, 16]
+  avoid_first_minutes: 15
+  avoid_before_rollover_minutes: 60
+  rollover_ny_hour: 17           # 17:00 New York = daily close / rollover
+
+news:
+  enabled: true
+  before_minutes: 30
+  after_minutes: 60
+  impacts: [High]
+
+scoring:
+  weights:
+    structure: 0.30
+    location: 0.25
+    candle: 0.20
+    behavior: 0.20
+    volume: 0.05
+  buy_threshold: 60
+  sell_threshold: -60
+  min_confluence: 3              # independent factors that must agree with the direction
+  factor_min: 0.2                # |component| needed for a factor to count
+  plan_min_score: 40             # trade plans are computed above this |score| (used by the backtest grid)
+
+trade:
+  min_rr: 1.5
+  sl_atr_buffer: 0.25
+  max_sl_atr: 3.0                # reject trades whose stop is wider than this
+  min_tp_atr: 0.5
+  risk_percent: 1.0
+  account_currency: USD
+
+backtest:
+  max_hold_bars: 72              # time stop
+  initial_equity: 10000
+  train_fraction: 0.6
+  min_trades: 15                 # parameter sets with fewer in-sample trades are ignored
+  overfit_ratio: 0.5             # OOS expectancy below ratio x IS expectancy => overfitting warning
+  grid:
+    threshold: [50, 55, 60, 65, 70]
+    min_rr: [1.5, 2.0, 2.5]
+
+correlation:
+  enabled: true
