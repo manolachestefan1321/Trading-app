@@ -9,3 +9,4 @@ matplotlib>=3.8
 dukascopy-python>=4.0
 yfinance>=0.2.50
 pytest>=8.0
+anthropic>=1.15

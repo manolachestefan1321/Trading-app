@@ -138,6 +138,51 @@ round-number steps, symbols per source).
 
 Use the walk-forward report rather than in-sample results to judge changes. A parameter set that only works in-sample is curve-fitted.
 
+## Mobile web app: analyze a chart photo
+
+`webapp/` is a phone-friendly PWA. Tap **Analyze Chart**, photograph a chart with the rear camera,
+and get **BUY / SELL / HOLD** with a confidence level and a short explanation.
+
+```bash
+pip install -r requirements.txt
+echo "ANTHROPIC_API_KEY=sk-ant-..." >> .env      # server-side only
+python -m webapp.server --port 8000              # then open http://<computer-ip>:8000 on the phone
+```
+
+### How the photo is analyzed (and what it costs)
+
+A photo contains no price data, so the trading engine above can't run on it. Instead, the photo
+goes to an **image-understanding model: Claude (`claude-opus-5-5`) through the Anthropic API**,
+called from the small Python backend (`webapp/server.py`, standard library HTTP server).
+
+- **The API key stays on the server**, in `.env` or an environment variable. The browser only talks to `/api/analyze` and never sees the key.
+- **Same rules as the engine:** the model gets the classical price action rules from the engine (structure, S/R zones, candlestick confirmation at a zone, behavior, three-factor confluence, ignore indicators). It must answer in a fixed JSON schema (structured outputs).
+- **Hard rules in code** (`webapp/vision.py`), not left to the model:
+  - **Unreadable photo:** if the model reports the chart is unreadable (not a chart, blur, glare, cropped, too few candles), the app shows an **error and no signal**.
+  - **Weak trade calls:** BUY/SELL below 60% model confidence becomes **HOLD**, and the app says so.
+  - **Any failure:** refusal, truncated or malformed output, network or API failure, or a missing API key all show an **error, never a signal**.
+  - **No made-up results:** there is no random, hardcoded or fallback signal anywhere in the code.
+- **Confidence** is the model's own estimate of how clearly the visible price action supports the call. It is **not** a calibrated probability of profit, and the app says this under the meter.
+- **Safety fallback:** if a safety classifier declines a request, Anthropic's server-side fallback (`fallbacks: "default"`) retries it on its recommended model. The app reports which model answered. If you'd rather a decline simply show an error, remove `fallbacks` and the beta flag in `vision.py`.
+
+**Cost:** you pay the Anthropic API per request; there's no subscription.
+
+- **Rates:** Claude Opus 5.5 costs $4 per million input tokens and $20 per million output tokens.
+- **Input:** the app shrinks each photo to at most 1568 px on the long side. A typical phone photo is then about 2,500 image tokens; with the instructions, input is about 3,500 tokens (≈ $0.014).
+- **Output:** the JSON answer plus the model's reasoning at `high` effort is usually 1,500–4,000 tokens (≈ $0.03–0.08).
+- **Total:** expect **roughly $0.04–0.10 per photo**. The exact cost of each analysis comes back in the response, is shown under "What the model saw", and is logged by the server.
+- **Cheaper:** `VISION_EFFORT=medium`, or `VISION_MODEL=claude-sonnet-5-5` ($2/$10 per million). Both may read charts less carefully.
+
+### Phone setup and PWA install
+
+- **Camera:** the camera opens through `<input type="file" accept="image/*" capture="environment">`. It works over plain HTTP on your local network.
+- **Home-screen install:** installing the PWA and running the service worker need **HTTPS** (browsers only allow `localhost` without it).
+  - Put the server behind any HTTPS host or reverse proxy, or a tunnel service.
+  - Or set `TLS_CERT` / `TLS_KEY` to a certificate the phone trusts.
+  - Then use "Add to Home Screen" (Safari share menu / Chrome menu).
+- **Internet-facing server:** set `APP_ACCESS_TOKEN` (the app asks for the code once and remembers it). `RATE_LIMIT_PER_HOUR` (default 30 per IP) stops strangers from spending your API credit.
+- **Offline:** the app shell works offline, but analysis needs the network. Analyses are never cached.
+
 ## Tests
 
 ```bash
@@ -161,5 +206,9 @@ fxpa/
   signal/               engine (scoring, filters, explanation), plan
   backtest/             engine (replay + simulation + metrics), walkforward, report
   viz/plot.py           matplotlib chart
+webapp/
+  server.py             backend: static PWA + POST /api/analyze (API key stays here)
+  vision.py             Claude vision call, JSON schema, no-signal-on-failure rules
+  static/               index.html, styles.css, app.js, sw.js, manifest.json, icons/
 tests/
 ```

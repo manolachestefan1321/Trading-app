@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Chart Analyzer</title>
+  <meta name="description" content="Photograph a price chart and get a price-action read: BUY, SELL or HOLD with an explanation.">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Chart Analyzer">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="top">
+    <h1>Chart Analyzer</h1>
+    <p class="sub">Price action read of a chart photo</p>
+  </header>
+
+  <main>
+    <!-- Home -->
+    <section id="view-home" class="view">
+      <label class="big-button" for="photo" role="button" tabindex="0" id="analyze-btn">
+        <svg aria-hidden="true" viewBox="0 0 24 24" width="40" height="40"><path fill="currentColor" d="M9 3 7.2 5H4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-3.2L15 3H9Zm3 5a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"/></svg>
+        <span>Analyze Chart</span>
+      </label>
+      <input id="photo" type="file" accept="image/*" capture="environment" hidden>
+      <ul class="tips">
+        <li>Fill the frame with the chart, latest candles included.</li>
+        <li>Avoid glare and hold the phone steady.</li>
+        <li>About 30+ candles visible works best.</li>
+      </ul>
+    </section>
+
+    <!-- Analyzing -->
+    <section id="view-busy" class="view" hidden>
+      <div class="preview-wrap"><img id="preview" alt="Photo of the chart being analyzed"></div>
+      <div class="status" role="status" aria-live="polite">
+        <span class="spinner" aria-hidden="true"></span>
+        <span id="status-text">Analyzing chart…</span>
+      </div>
+      <p class="muted small">This usually takes 10–40 seconds.</p>
+    </section>
+
+    <!-- Result -->
+    <section id="view-result" class="view" hidden>
+      <div class="preview-wrap small-preview"><img id="preview-result" alt="Analyzed chart photo"></div>
+      <div class="card result" aria-live="polite">
+        <div id="signal" class="signal"><span id="signal-icon" aria-hidden="true"></span><span id="signal-text"></span></div>
+        <div class="confidence">
+          <div class="conf-row"><span>Model confidence</span><strong id="conf-value"></strong></div>
+          <div class="meter" aria-hidden="true"><div id="conf-bar"></div></div>
+          <p class="muted small">How strongly the visible price action supports the call. It is not a probability of profit.</p>
+        </div>
+        <p id="explanation" class="explanation"></p>
+        <p id="note" class="note" hidden></p>
+        <details>
+          <summary>What the model saw</summary>
+          <dl class="facts">
+            <dt>Instrument</dt><dd id="f-instrument"></dd>
+            <dt>Timeframe</dt><dd id="f-timeframe"></dd>
+            <dt>Trend</dt><dd id="f-trend"></dd>
+          </dl>
+          <h3>Observations</h3><ul id="f-observations"></ul>
+          <h3>Key levels</h3><ul id="f-levels"></ul>
+          <p id="f-meta" class="muted small"></p>
+        </details>
+      </div>
+      <button class="big-button secondary" id="again-btn" type="button">Analyze another chart</button>
+    </section>
+
+    <!-- Error -->
+    <section id="view-error" class="view" hidden>
+      <div class="card error" role="alert">
+        <h2>No signal</h2>
+        <p id="error-text"></p>
+      </div>
+      <button class="big-button" id="retry-btn" type="button">Take another photo</button>
+    </section>
+  </main>
+
+  <footer class="disclaimer">
+    <strong>Not financial advice.</strong> Results come from an AI model reading a photo and can be wrong.
+    Trading involves risk of loss; make your own decisions.
+  </footer>
+
+  <script src="app.js" defer></script>
+</body>
+</html>
